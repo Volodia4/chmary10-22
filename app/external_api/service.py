@@ -1,5 +1,5 @@
 import requests
-from src.external_api.models import CatFactModel, CatImageModel, CatCombinedModel
+from app.external_api.models import CatFactModel, CatImageModel, CatCombinedModel
 
 
 class CatService:

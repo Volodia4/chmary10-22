@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, HttpUrl, ConfigDict
-from src.external_api.config import cat_config as cfg
+from app.external_api.config import cat_config as cfg
 
 
 class CatFactModel(BaseModel):

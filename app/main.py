@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from scr.database.utils import create_tables
-from scr.external_api import router as external_router
-from scr.cat_facts.router import router as cat_facts_router
+from app.database.utils import create_tables
+from app.external_api import router as external_router
+from app.cat_facts.router import router as cat_facts_router
 
 # Create database tables
 create_tables()
