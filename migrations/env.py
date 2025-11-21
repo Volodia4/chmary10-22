@@ -4,9 +4,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from src.settings import settings
-from src.database.base import Base
-from src.cat_facts.schema import CatFactStats, CatFact # noqa
+from scr.settings import settings
+from scr.database.base import Base
+from scr.cat_facts.schema import CatFactStats, CatFact # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

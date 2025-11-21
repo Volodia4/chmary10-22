@@ -1,5 +1,5 @@
 from redis import asyncio as aioredis
-from src.settings import settings
+from scr.settings import settings
 
 
 def get_redis() -> aioredis.Redis:

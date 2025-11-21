@@ -3,8 +3,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, Text, ForeignKey, DateTime
 from datetime import datetime
 
-from src.database.base import Base
-from src.database.base_schema import UpdatedMix
+from scr.database.base import Base
+from scr.database.base_schema import UpdatedMix
 
 
 class CatFact(Base, UpdatedMix):

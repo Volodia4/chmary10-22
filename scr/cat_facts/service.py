@@ -1,14 +1,14 @@
-# src/cat_facts/service.py
+# scr/cat_facts/service.py
 
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.cat_facts.repository import (
+from scr.cat_facts.repository import (
     CatFactRepository,
     CatFactStatsRepository,
 )
-from src.cat_facts.models import (
+from scr.cat_facts.models import (
     CatFactCreate,
     CatFactOut,
     CatFactStatsOut,
