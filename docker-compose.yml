@@ -13,7 +13,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   api:
-    build: ../../../../../Downloads
+    build: .
     container_name: catfacts_api
     restart: always
     volumes:
