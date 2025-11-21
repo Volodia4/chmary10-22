@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from scr.cache.models import CacheItem
-from scr.cache.service import cache_set, cache_get
+from src.cache.models import CacheItem
+from src.cache.service import cache_set, cache_get
 
 router = APIRouter(prefix="/cache", tags=["cache"])
 

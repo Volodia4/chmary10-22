@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from scr.database.base import get_db_session
-from scr.cat_facts.service import CatFactService
-from scr.cat_facts.models import (
+from src.database.base import get_db_session
+from src.cat_facts.service import CatFactService
+from src.cat_facts.models import (
     CatFactCreate,
     CatFactOut,
     CatFactStatsOut,

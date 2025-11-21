@@ -3,9 +3,9 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, update
 
-from scr.database.base_repository import BaseRepository
-from scr.cat_facts.schema import CatFact, CatFactStats
-from scr.database.utils import get_datetime
+from src.database.base_repository import BaseRepository
+from src.cat_facts.schema import CatFact, CatFactStats
+from src.database.utils import get_datetime
 
 
 class CatFactRepository(BaseRepository[CatFact]):

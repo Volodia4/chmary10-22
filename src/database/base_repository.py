@@ -1,10 +1,10 @@
-# scr/database/base_repository.py
+# src/database/base_repository.py
 
 from typing import Type, TypeVar, Generic, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 
-from scr.database.base import Base
+from src.database.base import Base
 
 
 ModelType = TypeVar("ModelType", bound=Base)

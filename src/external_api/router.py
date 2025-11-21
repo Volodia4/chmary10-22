@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
-from scr.external_api.service import service
-from scr.external_api.models import CatFactModel, CatImageModel, CatCombinedModel
+from src.external_api.service import service
+from src.external_api.models import CatFactModel, CatImageModel, CatCombinedModel
 
 
 router = APIRouter(prefix="/external", tags=["External API"])

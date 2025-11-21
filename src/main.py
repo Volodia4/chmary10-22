@@ -1,16 +1,16 @@
 from contextlib import asynccontextmanager
 
-# from scr.core.logging.logging_config import setup_logging
-from scr.database.base import _init_db_models # noqa
+# from src.core.logging.logging_config import setup_logging
+from src.database.base import _init_db_models # noqa
 from fastapi import FastAPI
-from scr.core import router as common_routes
-from scr.storage import router as storage_router
-from scr.external_api import router as external_router
-from scr.cat_facts import router as cat_fact_router
-from scr.cache import router as cache_router
+from src.core import router as common_routes
+from src.storage import router as storage_router
+from src.external_api import router as external_router
+from src.cat_facts import router as cat_fact_router
+from src.cache import router as cache_router
 from alembic.config import Config
 from alembic import command
-# from scr.core.logging.sentry import init_sentry
+# from src.core.logging.sentry import init_sentry
 
 
 def run_migrations():

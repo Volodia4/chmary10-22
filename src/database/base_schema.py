@@ -4,7 +4,7 @@ from sqlalchemy import DateTime
 
 from pydantic import BaseModel, ConfigDict
 
-from scr.database.utils import get_datetime
+from src.database.utils import get_datetime
 
 
 class UpdatedMix:

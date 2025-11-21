@@ -1,5 +1,5 @@
 import json
-from scr.core.redis_client import get_redis
+from src.core.redis_client import get_redis
 
 
 async def cache_set(key: str, value, ttl: int | None = None):
