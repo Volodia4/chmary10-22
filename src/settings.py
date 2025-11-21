@@ -16,11 +16,11 @@ class Settings(BaseSettings):
     )
 
     # database settings (postgres)
-    pg_host: str = "localhost"
+    pg_host: str = "dpg-d4g60tpr0fns738jfq40-a"
     pg_port: int = 5432
-    pg_username: str = "postgres"
-    pg_password: str = "postgres"
-    pg_db_name: str = "postgres"
+    pg_username: str = "postgress"
+    pg_password: str = "V8RgRPr4af2NWLiwzq7MouYZMRjRRHIq"
+    pg_db_name: str = "database1_zhzg"
     pg_db_driver: str = "postgresql"
 
     @property
