@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-run_migrations()
+# run_migrations()
 
 
 app = FastAPI(

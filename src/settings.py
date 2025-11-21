@@ -5,7 +5,7 @@ from pydantic import ConfigDict
 class Settings(BaseSettings):
     """Application configuration loaded from environment variables."""
 
-    redis_url: str | None = None
+    redis_url: str
     redis_TTL: int = 60  # cache time
     environment: str = "development"
 
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     # database settings (postgres)
-    pg_host: str = "dpg-d4g60tpr0fns738jfq40-a"
+    pg_host: str = "dpg-d4g60tpr0fns738jfq40-a.frankfurt-postgres.render.com"
     pg_port: int = 5432
     pg_username: str = "postgress"
     pg_password: str = "V8RgRPr4af2NWLiwzq7MouYZMRjRRHIq"
