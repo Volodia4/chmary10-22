@@ -1,11 +1,20 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from typing import Generic, TypeVar, Optional
 from datetime import datetime
-from typing import Optional
+
+T = TypeVar('T')
 
 class BaseSchema(BaseModel):
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
-class UpdatedMixSchema(BaseSchema):
-    created_at: datetime
+class BaseResponseSchema(BaseSchema):
+    id: int
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    items: list[T]
+    total: int
+    page: int
+    size: int
+    pages: int

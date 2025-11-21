@@ -1,42 +1,57 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+import requests
 from typing import List, Optional
-from .repository import cat_fact_repository
-from .schema import CatFactCreate, CatFactUpdate, CatFactResponse, CatFactStatsResponse
+from sqlalchemy.orm import Session
+from .repository import CatFactRepository
+from .schema import CatFactCreate, CatFactResponse
+from .config import cat_facts_config
 from .models import CatFact
 
+
 class CatFactService:
-    def __init__(self):
-        self.repository = cat_fact_repository
+    def __init__(self, db: Session):
+        self.repository = CatFactRepository(db)
+        self.api_url = cat_facts_config.api_url
+        self.timeout = cat_facts_config.timeout
 
-    async def create_fact(self, db: AsyncSession, fact_in: CatFactCreate) -> CatFactResponse:
-        """Create a new cat fact"""
-        return await self.repository.create(db, fact_in)
+    def fetch_from_external_api(self) -> CatFactCreate:
+        """Fetch random cat fact from external API"""
+        try:
+            response = requests.get(self.api_url, timeout=self.timeout)
+            response.raise_for_status()
+            data = response.json()
 
-    async def get_all_facts(self, db: AsyncSession, skip: int = 0, limit: int = 100) -> List[CatFactResponse]:
-        """Get all cat facts with pagination"""
-        facts = await self.repository.get_all(db, skip, limit)
-        return [CatFactResponse.from_orm(fact) for fact in facts]
+            return CatFactCreate(
+                fact=data['fact'],
+                length=data['length']
+            )
+        except requests.RequestException as e:
+            raise Exception(f"Failed to fetch from external API: {str(e)}")
 
-    async def get_fact_by_id(self, db: AsyncSession, fact_id: int) -> Optional[CatFactResponse]:
+    def create_cat_fact(self, cat_fact: CatFactCreate) -> CatFact:
+        """Create a new cat fact in database"""
+        return self.repository.create_cat_fact(cat_fact)
+
+    def get_cat_fact(self, id: int) -> Optional[CatFact]:
         """Get cat fact by ID"""
-        fact = await self.repository.get_by_id(db, fact_id)
-        return CatFactResponse.from_orm(fact) if fact else None
+        return self.repository.get_by_id(id)
 
-    async def update_fact(self, db: AsyncSession, fact_id: int, fact_in: CatFactUpdate) -> Optional[CatFactResponse]:
-        """Update cat fact"""
-        fact = await self.repository.get_by_id(db, fact_id)
-        if fact:
-            updated_fact = await self.repository.update(db, fact, fact_in)
-            return CatFactResponse.from_orm(updated_fact)
-        return None
+    def get_all_cat_facts(self, skip: int = 0, limit: int = 100) -> List[CatFact]:
+        """Get all cat facts with pagination"""
+        return self.repository.get_all(skip=skip, limit=limit)
 
-    async def delete_fact(self, db: AsyncSession, fact_id: int) -> bool:
-        """Delete cat fact"""
-        return await self.repository.delete(db, fact_id)
+    def fetch_and_save_fact(self) -> CatFact:
+        """Fetch from external API and save to database"""
+        external_fact = self.fetch_from_external_api()
+        return self.create_cat_fact(external_fact)
 
-    async def get_statistics(self, db: AsyncSession) -> Optional[CatFactStatsResponse]:
-        """Get cat facts statistics"""
-        stats = await self.repository.get_stats(db)
-        return CatFactStatsResponse.from_orm(stats) if stats else None
+    def get_facts_by_length(self, min_length: Optional[int] = None, max_length: Optional[int] = None) -> List[CatFact]:
+        """Get facts filtered by length"""
+        return self.repository.get_by_fact_length(min_length, max_length)
 
-cat_fact_service = CatFactService()
+    def search_facts(self, search_term: str) -> List[CatFact]:
+        """Search facts by text content"""
+        return self.repository.search_facts(search_term)
+
+    def get_facts_count(self) -> int:
+        """Get total number of facts in database"""
+        return self.repository.count()

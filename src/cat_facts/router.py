@@ -1,78 +1,97 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
-from src.database.utils import get_db
-from .schema import CatFactCreate, CatFactUpdate, CatFactResponse, CatFactStatsResponse
-from .service import cat_fact_service
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+from typing import List, Optional
 
-router = APIRouter(prefix="/facts", tags=["Cat Facts"])
+from scr.database.utils import get_db
+from .service import CatFactService
+from .schema import CatFactResponse, CatFactListResponse
 
-@router.post("/", response_model=CatFactResponse, status_code=status.HTTP_201_CREATED)
-async def create_fact(
-    fact_in: CatFactCreate,
-    db: AsyncSession = Depends(get_db)
+router = APIRouter(prefix="/cat-facts", tags=["Cat Facts Database"])
+
+
+@router.post("/fetch-external", response_model=CatFactResponse, status_code=status.HTTP_201_CREATED)
+def fetch_and_save_external_fact(
+        db: Session = Depends(get_db)
 ):
-    """Create a new cat fact"""
-    return await cat_fact_service.create_fact(db, fact_in)
+    """Fetch a random cat fact from external API and save to database"""
+    try:
+        service = CatFactService(db)
+        fact = service.fetch_and_save_fact()
+        return fact
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch and save fact: {str(e)}"
+        )
 
-@router.get("/", response_model=List[CatFactResponse])
-async def get_all_facts(
-    skip: int = 0,
-    limit: int = 100,
-    db: AsyncSession = Depends(get_db)
+
+@router.get("/", response_model=CatFactListResponse)
+def get_all_facts(
+        skip: int = Query(0, ge=0, description="Number of records to skip"),
+        limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
+        db: Session = Depends(get_db)
 ):
-    """Get all cat facts"""
-    return await cat_fact_service.get_all_facts(db, skip, limit)
+    """Get all cat facts from database with pagination"""
+    service = CatFactService(db)
+    facts = service.get_all_cat_facts(skip=skip, limit=limit)
+    total = service.get_facts_count()
+
+    return CatFactListResponse(
+        items=facts,
+        total=total,
+        page=skip // limit + 1 if limit > 0 else 1,
+        size=limit
+    )
+
 
 @router.get("/{fact_id}", response_model=CatFactResponse)
-async def get_fact(
-    fact_id: int,
-    db: AsyncSession = Depends(get_db)
+def get_fact_by_id(
+        fact_id: int,
+        db: Session = Depends(get_db)
 ):
-    """Get cat fact by ID"""
-    fact = await cat_fact_service.get_fact_by_id(db, fact_id)
+    """Get specific cat fact by ID"""
+    service = CatFactService(db)
+    fact = service.get_cat_fact(fact_id)
+
     if not fact:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Cat fact not found"
+            detail=f"Cat fact with ID {fact_id} not found"
         )
+
     return fact
 
-@router.put("/{fact_id}", response_model=CatFactResponse)
-async def update_fact(
-    fact_id: int,
-    fact_in: CatFactUpdate,
-    db: AsyncSession = Depends(get_db)
-):
-    """Update cat fact"""
-    fact = await cat_fact_service.update_fact(db, fact_id, fact_in)
-    if not fact:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Cat fact not found"
-        )
-    return fact
 
-@router.delete("/{fact_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_fact(
-    fact_id: int,
-    db: AsyncSession = Depends(get_db)
+@router.get("/search/by-length", response_model=CatFactListResponse)
+def get_facts_by_length(
+        min_length: Optional[int] = Query(None, ge=1, description="Minimum fact length"),
+        max_length: Optional[int] = Query(None, ge=1, description="Maximum fact length"),
+        db: Session = Depends(get_db)
 ):
-    """Delete cat fact"""
-    success = await cat_fact_service.delete_fact(db, fact_id)
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Cat fact not found"
-        )
+    """Get facts filtered by text length"""
+    service = CatFactService(db)
+    facts = service.get_facts_by_length(min_length, max_length)
 
-@router.get("/stats/statistics", response_model=CatFactStatsResponse)
-async def get_statistics(db: AsyncSession = Depends(get_db)):
-    """Get cat facts statistics"""
-    stats = await cat_fact_service.get_statistics(db)
-    if not stats:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No statistics available"
-        )
-    return stats
+    return CatFactListResponse(
+        items=facts,
+        total=len(facts),
+        page=1,
+        size=len(facts)
+    )
+
+
+@router.get("/search/text", response_model=CatFactListResponse)
+def search_facts(
+        query: str = Query(..., min_length=2, description="Search term"),
+        db: Session = Depends(get_db)
+):
+    """Search facts by text content"""
+    service = CatFactService(db)
+    facts = service.search_facts(query)
+
+    return CatFactListResponse(
+        items=facts,
+        total=len(facts),
+        page=1,
+        size=len(facts)
+    )

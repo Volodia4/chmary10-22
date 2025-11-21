@@ -1,33 +1,26 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import func
+from sqlalchemy.orm import Session
 from typing import List, Optional
-from src.database.base_repository import BaseRepository
-from .models import CatFact, CatFactStats
+from scr.database.base_repository import BaseRepository
+from .models import CatFact
 from .schema import CatFactCreate, CatFactUpdate
 
 
-class CatFactRepository(BaseRepository[CatFact, CatFactCreate, CatFactUpdate]):
-    def __init__(self):
-        super().__init__(CatFact)
+class CatFactRepository(BaseRepository[CatFact]):
+    def __init__(self, db: Session):
+        super().__init__(CatFact, db)
 
-    async def get_stats(self, db: AsyncSession) -> Optional[CatFactStats]:
-        """Get cat facts statistics"""
-        result = await db.execute(
-            func.avg(CatFact.length).label('avg_length'),
-            func.max(CatFact.length).label('max_length'),
-            func.min(CatFact.length).label('min_length'),
-            func.count(CatFact.id).label('total')
-        )
-        stats = result.first()
+    def create_cat_fact(self, cat_fact: CatFactCreate) -> CatFact:
+        return self.create(cat_fact.model_dump())
 
-        if stats:
-            return CatFactStats(
-                total_facts=stats.total or 0,
-                average_length=round(stats.avg_length or 0, 2),
-                longest_fact=stats.max_length or 0,
-                shortest_fact=stats.min_length or 0
-            )
-        return None
+    def get_by_fact_length(self, min_length: Optional[int] = None, max_length: Optional[int] = None) -> List[CatFact]:
+        query = self.db.query(CatFact)
 
+        if min_length is not None:
+            query = query.filter(CatFact.length >= min_length)
+        if max_length is not None:
+            query = query.filter(CatFact.length <= max_length)
 
-cat_fact_repository = CatFactRepository()
+        return query.all()
+
+    def search_facts(self, search_term: str) -> List[CatFact]:
+        return self.db.query(CatFact).filter(CatFact.fact.ilike(f"%{search_term}%")).all()
